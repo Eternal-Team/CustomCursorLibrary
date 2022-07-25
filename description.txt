@@ -1,0 +1,1 @@
+Allows the mod developer to use custom cursor textures for various things
