@@ -1,5 +1,5 @@
 author = Itorius & team
-version = 1.0
+version = 1.0.1
 displayName = Custom Cursor Library
 homepage = https://terraria.itorius.com/
 hideCode = false

@@ -14,7 +14,13 @@ public class CustomCursor : Mod
 {
 	public override void Load()
 	{
-		IL.Terraria.Main.DrawInterface_36_Cursor += DrawCursor;
+		IL_Main.DrawInterface_36_Cursor += DrawCursor;
+
+		/*On_Main.DrawInventory += (orig, self) =>
+		{
+			orig(self);
+			SetCursor("Terraria/Images/UI/Cursor_7");
+		};*/
 	}
 	
 	private const int CustomCursorOverride = 1000;
@@ -35,9 +41,12 @@ public class CustomCursor : Mod
 		ILCursor cursor = new ILCursor(il);
 		ILLabel label = cursor.DefineLabel();
 
-		if (cursor.TryGotoNext(i => i.MatchLdsfld(typeof(Main).GetField("cursorOverride", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))))
+		FieldInfo fieldCursorOverride = typeof(Main).GetField("cursorOverride", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+		if (fieldCursorOverride is null) throw new NullReferenceException("Failed to obtain cursorOverride field");
+		
+		if (cursor.TryGotoNext(i => i.MatchLdsfld(fieldCursorOverride)))
 		{
-			cursor.Emit(OpCodes.Ldsfld, typeof(Main).GetField("cursorOverride", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
+			cursor.Emit(OpCodes.Ldsfld, fieldCursorOverride);
 			cursor.Emit(OpCodes.Ldc_I4, CustomCursorOverride);
 			cursor.Emit(OpCodes.Ceq);
 			cursor.Emit(OpCodes.Brfalse, label);
@@ -47,7 +56,7 @@ public class CustomCursor : Mod
 
 			cursor.EmitDelegate<Action<float, float>>((rotation, scale) =>
 			{
-				if (CursorTexture == null) return;
+				if (CursorTexture is null) return;
 
 				float texScale = Math.Min(20f / CursorTexture.Value.Width, 20f / CursorTexture.Value.Height);
 				float s = Pulse ? Main.cursorScale * texScale : texScale;
